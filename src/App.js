@@ -5,6 +5,11 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <img
+          src="/StackOS_Logo_Black.png"
+          style={{ paddingTop: 15 }}
+          width={250}
+        />
         <Home />
       </header>
     </div>
