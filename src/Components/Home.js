@@ -1,31 +1,47 @@
-import { TextField, Button, FormHelperText } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+  TextField,
+  Button,
+  FormHelperText,
+  CircularProgress,
+} from "@mui/material";
+import { useState } from "react";
 import Web3 from "web3";
 import QRPage from "./QRPage";
 
-function Home() {
-  const web3 = new Web3(`https://polygon-rpc.com/`);
+const web3 = new Web3(`https://polygon-rpc.com/`);
 
+function Home() {
   const [numbers, setNumbers] = useState(0);
   const [error, SetError] = useState(null);
   const [wallets, setWallets] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    handleLoader(true);
     try {
       const num = parseInt(numbers);
       if (!num || num <= 0) {
         SetError("Please check Input is valid or not and try again");
+        handleLoader(false);
       } else {
         let tempWallet = [];
-        for (let i = 0; i < num; i++) {
+        let i = 0;
+        while (i < num) {
           var account = web3.eth.accounts.create();
           tempWallet.push(account);
+          i++;
         }
         setWallets(tempWallet);
       }
     } catch (err) {
       SetError("Oops! Errors Occured");
+      handleLoader(false);
     }
+  };
+
+  const handleLoader = (flag) => {
+    setIsLoading(flag);
   };
 
   return (
@@ -35,7 +51,8 @@ function Home() {
         <p>Enter the Number of etheruem wallets you want to create</p>
         <TextField
           onChange={(e) => {
-            SetError(null);
+            e.preventDefault();
+            if (error) SetError(null);
             setNumbers(e.target.value);
           }}
           value={numbers}
@@ -44,13 +61,17 @@ function Home() {
           <FormHelperText style={{ color: "red" }}>{error}</FormHelperText>
         )}
         <Button
+          disabled={isLoading}
           style={{ margin: 30 }}
           variant="contained"
           onClick={handleSubmit}
         >
           Submit
         </Button>
-        {wallets.length > 0 && <QRPage wallets={wallets} />}
+        {/* {isLoading && <CircularProgress />} */}
+        {wallets.length > 0 && (
+          <QRPage wallets={wallets} handleLoader={handleLoader} />
+        )}
       </header>
     </div>
   );

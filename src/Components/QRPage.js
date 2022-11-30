@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import qr from "qrcode";
 import html2pdf from "html2pdf.js";
 
-function QRPage(params) {
-  const pdfRef = useRef();
-
+function QRPage({ wallets, handleLoader }) {
   const [downloadLink, setDownloadLink] = useState("");
   const [codes, setCodes] = useState([]);
+  const pdfRef = useRef();
 
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -31,9 +30,9 @@ function QRPage(params) {
     const addresses = [];
     const tempCodes = [];
 
-    params.wallets.map(async (t) => {
+    wallets.map(async (t) => {
       addresses.push(t.address);
-      let code = await myqrcode(t.address);
+      let code = await myqrcode(t.privateKey);
       tempCodes.push(code);
     });
 
@@ -44,13 +43,15 @@ function QRPage(params) {
     if (downloadLink !== "") window.URL.revokeObjectURL(downloadLink);
 
     setDownloadLink(window.URL.createObjectURL(data));
-  }, [params]);
+    handleLoader(false);
+  }, [wallets]);
 
   const handlePDFCreation = async () => {
     const input = document.getElementById("divToPrint");
     await html2pdf(input, {
       filename: "eth-wallets-qrcodes",
       pagebreak: { mode: "avoid-all" },
+      jsPDF: { orientation: "landscape" },
     });
   };
 
