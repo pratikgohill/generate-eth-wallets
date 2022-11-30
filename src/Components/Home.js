@@ -50,7 +50,7 @@ function Home() {
         >
           Submit
         </Button>
-        <div>{wallets.length > 0 && <QRPage wallets={wallets} />}</div>
+        {wallets.length > 0 && <QRPage wallets={wallets} />}
       </header>
     </div>
   );

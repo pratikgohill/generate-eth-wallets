@@ -2,9 +2,7 @@ import { Button, CircularProgress, Grid, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useRef, useState } from "react";
 import qr from "qrcode";
-import ReactToPrint from "react-to-print";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import html2pdf from "html2pdf.js";
 
 function QRPage(params) {
   const pdfRef = useRef();
@@ -19,14 +17,6 @@ function QRPage(params) {
     textAlign: "center",
     color: theme.palette.text.secondary,
   }));
-
-  const pageStyle = `  
-  @media all {
-    .pagebreak {
-      display: none;
-    }
-  }
-`;
 
   const myqrcode = (src) => {
     return new Promise((resolve, reject) => {
@@ -56,22 +46,11 @@ function QRPage(params) {
     setDownloadLink(window.URL.createObjectURL(data));
   }, [params]);
 
-  const handleTest = async () => {
-    // try {
-    //   const report = new jsPDF("portrait", "pt", "a4");
-    //   report.html(document.getElementById("divToPrint")).then(() => {
-    //     report.save("report.pdf");
-    //   });
-    // } catch (err) {
-    //   console.log("error K : ", err);
-    // }
+  const handlePDFCreation = async () => {
     const input = document.getElementById("divToPrint");
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
-      pdf.addImage(imgData, "JPEG", 0, 0);
-      // pdf.output('dataurlnewwindow');
-      pdf.save("download.pdf");
+    await html2pdf(input, {
+      filename: "eth-wallets-qrcodes",
+      pagebreak: { mode: "avoid-all" },
     });
   };
 
@@ -81,13 +60,9 @@ function QRPage(params) {
       <a download="eth-wallet-addresslist.txt" href={downloadLink}>
         <Button style={{ margin: 30 }}>Download Wallet Address List</Button>
       </a>
-
-      <ReactToPrint
-        pageStyle={pageStyle}
-        trigger={() => <Button style={{ margin: 30 }}>Print this out!</Button>}
-        content={() => pdfRef.current}
-      />
-      {/* <Button onClick={handleTest}>Test</Button> */}
+      <Button style={{ margin: 30 }} onClick={handlePDFCreation}>
+        Generate PDF
+      </Button>
       <Grid
         id="divToPrint"
         className="pagebreak "
