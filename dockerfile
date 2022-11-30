@@ -1,20 +1,25 @@
-# Fetching the latest node image on apline linux
-FROM node:alpine AS development
+FROM node:16.3 as build 
 
-# Declaring env
-ENV NODE_ENV development
 
-# Setting up the work directory
 WORKDIR /react-app
 
-# Installing dependencies
-COPY ./package.json /react-app
+
+COPY package*.json .
+
+
 RUN npm install
 
-# Copying all the files in our project
+
 COPY . .
 
-EXPOSE 3000
 
-# Starting our application
-CMD npm start
+RUN npm run build
+
+
+FROM nginx:1.19
+
+
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+
+
+COPY --from=build /react-app/build /usr/share/nginx/html
